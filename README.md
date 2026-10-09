@@ -6,7 +6,7 @@ AMCreate 是一个面向 macOS 自动化的 Agent Skill 项目，目标是让 Ag
 
 ## 当前状态
 
-阶段 1、2 已完成：Skill 入口、文件清单脚本和 AppleScript 应用构建工具已加入。示例应用已在本机 macOS 26.6.2 从 Finder 双击运行并核对输出；工作流与系统入口进入下一阶段。
+阶段 1–3 已完成：Skill 入口、脚本、AppleScript 应用及 Automator 普通工作流、快速操作、文件夹操作已有构建方式。示例已在本机 macOS 26.6.2 验证 Finder 双击、Automator 运行、Finder 服务菜单和新增文件触发。可靠交付检查在阶段 4 补充。
 
 本文描述项目定位和预期能力；开发目的、实施计划与规范见 [Agent.md](Agent.md)。
 
@@ -80,6 +80,8 @@ Automator 支持通过 Shell、AppleScript 和 JavaScript 扩展工作流；脚�
 python3 -m unittest discover -s tests -v
 ```
 
-应用构建命令、依赖与使用方式见 [应用说明](references/applications.md)。
+应用构建命令、依赖与使用方式见 [应用说明](references/applications.md)；普通工作流、快速操作、文件夹操作的构建与安装见 [工作流说明](references/workflows.md)。构建不会自动安装或绑定。
+
+可保留的本机验收产物在 `build/验收/`，由 Git 忽略；回归测试使用临时目录。
 
 阶段验证证据见 [references/verification.md](references/verification.md)。

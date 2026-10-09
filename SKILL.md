@@ -19,4 +19,4 @@ description: 在 macOS 上根据任务需求生成、构建和验证自动化脚
 
 ## 能力边界
 
-已有脚本示例和 AppleScript 应用构建工具。应用任务读取 [references/applications.md](references/applications.md)，通过 `scripts/build_app.py` 构建。工作流的构建指导随对应阶段加入。打印插件、日历提醒、图像捕捉插件、听写命令需要单独确认目标系统的注册方式和真实入口，不能仅凭扩展名宣布支持。签名、公证、跨 Mac 分发和长期后台运行按需求处理。
+已有脚本示例和 AppleScript 应用构建工具。应用任务读取 [references/applications.md](references/applications.md)，通过 `scripts/build_app.py` 构建。普通工作流、快速操作与文件夹操作读取 [references/workflows.md](references/workflows.md)，通过 `scripts/build_workflow.py` 构建。系统集成在用户要求范围内安装及绑定，验证完成后恢复测试状态。打印插件、日历提醒、图像捕捉插件、听写命令需要单独确认目标系统的注册方式和真实入口，不能仅凭扩展名宣布支持。签名、公证、跨 Mac 分发和长期后台运行按需求处理。
