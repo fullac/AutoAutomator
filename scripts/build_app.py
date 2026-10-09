@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import plistlib
 import shutil
 import subprocess
 import sys
@@ -25,8 +26,7 @@ def shell_wrapper(shell, arguments, bundle_id):
         do shell script "/bin/mkdir -p " & quoted form of logDirectory
         do shell script {as_string(shell)} & " " & quoted form of resourcePath{argument_code} & " >> " & quoted form of logPath & " 2>&1"
     on error errorMessage number errorNumber
-        display alert "AMCreate task failed" message (errorMessage & return & "Log: " & logPath)
-        error errorMessage number errorNumber
+        error (errorMessage & return & "Log: " & logPath) number errorNumber
     end try
 end run
 '''
@@ -44,8 +44,8 @@ def build(args):
         raise ValueError("--arg is only supported with --shell-script")
     if args.shell not in ("/bin/sh", "/bin/bash", "/bin/zsh"):
         raise ValueError("choose a system shell: /bin/sh, /bin/bash or /bin/zsh")
-    if not Path("/usr/bin/osacompile").is_file() or not Path(args.shell).is_file():
-        raise ValueError("required macOS compiler or shell is missing")
+    if not all(Path(tool).is_file() for tool in ("/usr/bin/osacompile", "/usr/bin/codesign", args.shell)):
+        raise ValueError("required macOS compiler, codesign or shell is missing")
     if args.shell_script:
         subprocess.run([args.shell, "-n", str(source)], check=True, capture_output=True, text=True)
     output = args.output.absolute()
@@ -68,7 +68,21 @@ def build(args):
                        check=True, capture_output=True, text=True)
         if args.shell_script:
             shutil.copyfile(saved_source, application / "Contents/Resources/task.sh")
+        info_path = application / "Contents/Info.plist"
+        info = plistlib.loads(info_path.read_bytes())
+        info["CFBundleIdentifier"] = "com." + bundle_id
+        info_path.write_bytes(plistlib.dumps(info))
+        # Resource copying must finish before ad-hoc signing the complete local application.
+        subprocess.run(["/usr/bin/codesign", "--force", "--sign", "-", str(application)],
+                       check=True, capture_output=True, text=True)
+        subprocess.run(["/usr/bin/codesign", "--verify", "--deep", "--strict", str(application)],
+                       check=True, capture_output=True, text=True)
         record = {
+            "schema_version": 1,
+            "artifact": application.name,
+            "files": {str(path.relative_to(output)): hashlib.sha256(path.read_bytes()).hexdigest()
+                      for path in sorted(output.rglob("*")) if path.is_file()},
+            "signing": "ad-hoc; local integrity only, no Developer ID or notarization",
             "type": "applescript-application", "name": args.name,
             "macos": platform.mac_ver()[0],
             "source_sha256": hashlib.sha256(saved_source.read_bytes()).hexdigest(),

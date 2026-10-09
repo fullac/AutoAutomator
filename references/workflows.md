@@ -1,6 +1,6 @@
 # Automator 工作流与系统入口
 
-构建工具需要 macOS、Python 3 标准库及系统“运行 Shell 脚本”动作。产物使用系统 Shell 与 Automator，无需 Python。当前实现单个 Shell 动作，任务源码嵌入 `document.wflow`，可移走原源码或安装后执行。保留 `source/task.sh` 与 `build.json` 供修改及重建。
+构建工具需要 macOS、Python 3.9+ 标准库及系统“运行 Shell 脚本”动作。产物使用系统 Shell 与 Automator，无需 Python。当前实现单个 Shell 动作，任务源码嵌入 `document.wflow`，可移走原源码或安装后执行。保留 `source/task.sh` 与 `build.json` 供修改及重建。
 
 ## 普通工作流
 

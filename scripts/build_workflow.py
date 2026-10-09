@@ -87,7 +87,10 @@ def build(args):
         source_dir = output / 'source'
         source_dir.mkdir()
         shutil.copyfile(source, source_dir / 'task.sh')
-        record = {'type': args.type, 'name': args.name, 'macos': platform.mac_ver()[0],
+        record = {'schema_version': 1, 'artifact': bundle.name,
+                  'files': {str(path.relative_to(output)): hashlib.sha256(path.read_bytes()).hexdigest()
+                            for path in sorted(output.rglob('*')) if path.is_file()},
+                  'type': args.type, 'name': args.name, 'macos': platform.mac_ver()[0],
                   'shell': args.shell, 'arguments': args.arg,
                   'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
                   'input': 'fixed arguments then each selected/added path as a separate argument',
