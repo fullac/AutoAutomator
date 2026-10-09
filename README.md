@@ -6,7 +6,7 @@ AMCreate 是一个面向 macOS 自动化的 Agent Skill 项目，目标是让 Ag
 
 ## 当前状态
 
-项目处于设计与文档阶段。当前仓库包含项目说明和开发约定，尚未提供可安装的 Skill、生成脚本或经过验证的示例产物。
+阶段 1 已完成：可安装的 `amcreate` Skill 入口和文件清单脚本已加入，脚本已在本机 macOS 26.6.2 验证中文、空格、特殊字符路径及拒绝覆盖行为。应用与工作流封装正在后续阶段实现。
 
 本文描述项目定位和预期能力；开发目的、实施计划与规范见 [Agent.md](Agent.md)。
 
@@ -62,4 +62,22 @@ Automator 支持通过 Shell、AppleScript 和 JavaScript 扩展工作流；脚�
 | [README.md](README.md) | 仓库介绍、预期产物、使用场景和当前状态 |
 | [Agent.md](Agent.md) | 开发目的、实施计划、开发与验证规范 |
 
-Skill 入口、辅助脚本和模板将在对应实现阶段加入仓库，届时补充安装与调用说明。
+## 安装与调用
+
+把本仓库复制或链接到目标 Agent 的技能目录，以 `amcreate` 作为目录名。例如 Codex 使用 `~/.codex/skills/amcreate`。目标目录已存在时先核对内容，避免覆盖。此仓库自身就是 Skill 目录，`SKILL.md` 为入口，不需要嵌套另一层。
+
+安装后以 `$amcreate` 调用，或描述 Mac 自动化任务。首个可执行示例：
+
+```sh
+/bin/zsh scripts/list_files.sh '/path/to/输入 目录' '/path/to/结果.txt'
+```
+
+此脚本使用系统 zsh，输出直属普通文件名称；不会覆盖已有文件。详细契约见 [脚本说明](references/scripts.md)。
+
+开发验证使用 Python 3（仅测试和后续构建工具需要）：
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+阶段验证证据见 [references/verification.md](references/verification.md)。
