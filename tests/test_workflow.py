@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 @unittest.skipUnless(platform.system() == 'Darwin', 'requires macOS Automator')
 class WorkflowTest(unittest.TestCase):
     def test_each_type_passes_input_as_arguments(self):
-        with tempfile.TemporaryDirectory(prefix='AMCreate workflow 中文 ') as folder:
+        with tempfile.TemporaryDirectory(prefix='AutoAutomator workflow 中文 ') as folder:
             root = pathlib.Path(folder)
             receipts = root / 'receipts'
             receipts.mkdir()
@@ -25,7 +25,7 @@ class WorkflowTest(unittest.TestCase):
                                '--arg=' + str(receipts), '--output', str(output)]
                     built = subprocess.run(command, capture_output=True, text=True)
                     self.assertEqual(built.returncode, 0, built.stderr)
-                    bundle = output / 'AMCreate Task.workflow'
+                    bundle = output / 'AutoAutomator Task.workflow'
                     result = subprocess.run(['/usr/bin/automator', '-i', str(item), str(bundle)],
                                             capture_output=True, text=True, timeout=30)
                     self.assertEqual(result.returncode, 0, result.stderr)
@@ -46,7 +46,7 @@ class WorkflowTest(unittest.TestCase):
                                     str(ROOT / 'scripts/list_files.sh'), '--output', str(output)],
                                    capture_output=True, text=True)
             self.assertEqual(built.returncode, 0, built.stderr)
-            result = subprocess.run(['/usr/bin/automator', str(output / 'AMCreate Task.workflow')],
+            result = subprocess.run(['/usr/bin/automator', str(output / 'AutoAutomator Task.workflow')],
                                     capture_output=True, text=True, timeout=30)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('usage: list_files.sh', result.stdout + result.stderr)

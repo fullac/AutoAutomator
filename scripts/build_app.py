@@ -20,7 +20,7 @@ def shell_wrapper(shell, arguments, bundle_id):
     argument_code = "".join(" & \" \" & quoted form of " + as_string(arg) for arg in arguments)
     return f'''on run
     set resourcePath to POSIX path of (path to resource "task.sh")
-    set logDirectory to POSIX path of (path to library folder from user domain) & "Logs/AMCreate/"
+    set logDirectory to POSIX path of (path to library folder from user domain) & "Logs/AutoAutomator/"
     set logPath to logDirectory & "{bundle_id}.log"
     try
         do shell script "/bin/mkdir -p " & quoted form of logDirectory
@@ -53,7 +53,7 @@ def build(args):
     try:
         source_dir = output / "source"
         source_dir.mkdir()
-        bundle_id = "amcreate." + uuid.uuid4().hex
+        bundle_id = "autoautomator." + uuid.uuid4().hex
         if args.shell_script:
             saved_source = source_dir / "task.sh"
             shutil.copyfile(source, saved_source)
@@ -88,7 +88,7 @@ def build(args):
             "source_sha256": hashlib.sha256(saved_source.read_bytes()).hexdigest(),
             "shell": args.shell if args.shell_script else None,
             "arguments": args.arg,
-            "log": "~/Library/Logs/AMCreate/" + bundle_id + ".log" if args.shell_script else None,
+            "log": "~/Library/Logs/AutoAutomator/" + bundle_id + ".log" if args.shell_script else None,
             "rebuild": ["python3", "<skill>/scripts/build_app.py",
                         "--shell-script" if args.shell_script else "--source",
                         str(saved_source.relative_to(output)), "--output", "<new-delivery-directory>",
@@ -110,7 +110,7 @@ def main():
     group.add_argument("--shell-script", type=Path, help="shell task bundled inside the app")
     parser.add_argument("--shell", default="/bin/zsh")
     parser.add_argument("--arg", action="append", default=[], help="fixed task argument; repeat as needed")
-    parser.add_argument("--name", default="AMCreate Task")
+    parser.add_argument("--name", default="AutoAutomator Task")
     parser.add_argument("--output", type=Path, required=True, help="new delivery directory, parent must exist")
     args = parser.parse_args()
     try:

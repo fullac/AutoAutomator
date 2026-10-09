@@ -1,9 +1,9 @@
 ---
-name: amcreate
+name: autoautomator
 description: 在 macOS 上根据任务需求生成、构建和验证自动化脚本、AppleScript 应用及 Automator 工作流。适用于要求可运行脚本、双击应用、快速操作或文件夹操作的任务。
 ---
 
-# AMCreate
+# AutoAutomator
 
 把用户的任务交付为可维护源码和可运行产物。先确定输入输出、触发方式、保存位置及副作用；只询问影响实现的缺失信息。遵循用户指定类型，没有指定时按入口选择：终端执行用脚本，双击用应用，Automator 编排用工作流，Finder 选中文件用快速操作，目录新增文件用文件夹操作。
 

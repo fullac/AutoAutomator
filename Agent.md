@@ -1,10 +1,10 @@
-# AMCreate 开发约定
+# AutoAutomator 开发约定
 
-本文面向参与 AMCreate 开发的 Agent 和开发者，记录开发目的、实施计划与规范。仓库介绍见 [README.md](README.md)。
+本文面向参与 AutoAutomator 开发的 Agent 和开发者，记录开发目的、实施计划与规范。仓库介绍见 [README.md](README.md)。
 
 ## 开发目的
 
-将 AMCreate 做成一个可复用的 Skill，让 Agent 在 macOS 上把用户的自动化需求转化为可使用的脚本、`.app` 或 `.workflow`，并完成构建、验证和交付。
+将 AutoAutomator 做成一个可复用的 Skill，让 Agent 在 macOS 上把用户的自动化需求转化为可使用的脚本、`.app` 或 `.workflow`，并完成构建、验证和交付。
 
 开发应围绕三项结果展开：
 
@@ -59,7 +59,7 @@
 
 ## Skill 组织
 
-计划以 `amcreate` 作为 Skill 名称。实现阶段按实际需要加入以下资源，避免提前创建空目录或占位文件：
+计划以 `autoautomator` 作为 Skill 名称。实现阶段按实际需要加入以下资源，避免提前创建空目录或占位文件：
 
 | 路径 | 职责 |
 | --- | --- |

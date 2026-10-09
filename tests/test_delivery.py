@@ -10,7 +10,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 @unittest.skipUnless(platform.system() == 'Darwin', 'requires macOS')
 class DeliveryTest(unittest.TestCase):
     def test_signed_app_integrity_and_source_change(self):
-        with tempfile.TemporaryDirectory(prefix='AMCreate delivery ') as folder:
+        with tempfile.TemporaryDirectory(prefix='AutoAutomator delivery ') as folder:
             output = pathlib.Path(folder) / 'delivery'
             build = subprocess.run(['python3', str(ROOT / 'scripts/build_app.py'), '--shell-script',
                                     str(ROOT / 'scripts/list_files.sh'), '--output', str(output)],
@@ -34,7 +34,7 @@ class DeliveryTest(unittest.TestCase):
             command = ['python3', str(ROOT / 'scripts/verify_delivery.py'), str(output)]
             result = subprocess.run(command, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
-            (output / 'AMCreate Task.workflow/Contents/document.wflow').unlink()
+            (output / 'AutoAutomator Task.workflow/Contents/document.wflow').unlink()
             result = subprocess.run(command, capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
 

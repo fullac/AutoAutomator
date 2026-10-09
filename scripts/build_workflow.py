@@ -51,7 +51,7 @@ def build(args):
     automator_info = plistlib.loads(Path('/System/Applications/Automator.app/Contents/Info.plist').read_bytes())
     subprocess.run([args.shell, '-n', str(source)], check=True, capture_output=True, text=True)
     # Fixed arguments precede selected/added paths. Embedded source survives moving/installing the bundle.
-    command = 'exec ' + shlex.join([args.shell, '-c', source.read_text(), 'amcreate-task'] + args.arg) + ' "$@"\n'
+    command = 'exec ' + shlex.join([args.shell, '-c', source.read_text(), 'autoautomator-task'] + args.arg) + ' "$@"\n'
     action = {
         'AMAccepts': action_info['AMAccepts'], 'AMProvides': action_info['AMProvides'],
         'AMActionVersion': action_info['CFBundleVersion'], 'CFBundleVersion': action_info['CFBundleVersion'],
@@ -112,7 +112,7 @@ def main():
     parser.add_argument('--type', choices=TYPES, default='workflow')
     parser.add_argument('--shell', default='/bin/zsh')
     parser.add_argument('--arg', action='append', default=[])
-    parser.add_argument('--name', default='AMCreate Task')
+    parser.add_argument('--name', default='AutoAutomator Task')
     parser.add_argument('--output', type=Path, required=True, help='new delivery directory')
     args = parser.parse_args()
     try:

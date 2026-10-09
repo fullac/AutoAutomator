@@ -3,7 +3,7 @@
 `list_files.sh` 使用 macOS 自带 `/bin/zsh`，列出输入目录直属的普通文件（含隐藏文件、不含子目录和符号链接）。每行一个文件名，按 zsh 默认名称排序。拒绝换行文件名、已有输出与输出符号链接；空目录生成空文件。先写同目录临时文件再独占发布，避免并发覆盖；需要支持硬链接的输出文件系统。脚本不递归，不改变输入。
 
 ```sh
-/bin/zsh /path/to/amcreate/scripts/list_files.sh '/path/to/输入 目录' '/path/to/结果.txt'
+/bin/zsh /path/to/autoautomator/scripts/list_files.sh '/path/to/输入 目录' '/path/to/结果.txt'
 ```
 
 示例验证：在临时目录准备中文、空格、引号文件名，执行脚本，核对行内容和退出状态；再次执行应拒绝覆盖。正式任务另行声明输入契约，不把示例限定套到所有任务。

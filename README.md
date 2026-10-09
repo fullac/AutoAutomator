@@ -1,6 +1,6 @@
-# AMCreate
+# AutoAutomator
 
-AMCreate 是一个面向 macOS 自动化的 Agent Skill 项目，目标是让 Agent 根据自然语言需求，在 Mac 上生成可运行、可验证、可继续修改的自动化产物。
+AutoAutomator 是一个面向 macOS 自动化的 Agent Skill 项目，目标是让 Agent 根据自然语言需求，在 Mac 上生成可运行、可验证、可继续修改的自动化产物。
 
 用户描述要完成的任务，Agent 选择合适的实现方式，生成源文件和交付文件，并验证实际运行结果。目标产物包括自动化脚本、可双击运行的 `.app`，以及可在 Automator 中打开和执行的 `.workflow`。
 
@@ -12,7 +12,7 @@ AMCreate 是一个面向 macOS 自动化的 Agent Skill 项目，目标是让 Ag
 
 ## 预期产物
 
-Automator 有 8 种工作流类型，类型决定触发入口和安装方式，文件主要采用 `.workflow` 或 `.app` 两种封装。下表描述系统能力分类。AMCreate 当前生成普通工作流、快速操作和文件夹操作；当前 `.app` 构建采用 AppleScript 应用，Automator 应用和其他类型仍需按需求扩展。
+Automator 有 8 种工作流类型，类型决定触发入口和安装方式，文件主要采用 `.workflow` 或 `.app` 两种封装。下表描述系统能力分类。AutoAutomator 当前生成普通工作流、快速操作和文件夹操作；当前 `.app` 构建采用 AppleScript 应用，Automator 应用和其他类型仍需按需求扩展。
 
 | Automator 类型 | 常见文件封装 | 触发与使用方式 |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ Automator 有 8 种工作流类型，类型决定触发入口和安装方式，�
 
 类型分类来自 [Apple 的完整工作流类型说明（macOS 15 版）](https://support.apple.com/en-euro/guide/automator/aut7cac58839/2.10/mac/15.0)；应用封装与系统入口参考社区的[应用工作流实例](https://www.macosxautomation.com/automator/application/index.html)和[各类工作流应用说明](https://macosxautomation.com/automator/security.html)。2026-10-09 在本机 macOS 26.6.2、Automator 2.10 的新建窗口中确认仍列出上述 8 种类型；此分类核对不表示所有类型已实现；具体已验证能力见当前状态和验证记录。
 
-AMCreate 也交付可独立执行的自动化脚本。脚本是任务逻辑的实现方式；Automator 的上述 8 种类型是任务的封装与系统入口。AppleScript 脚本应用与 Automator 应用都可以使用 `.app` 后缀，但内部结构和构建方式不同。
+AutoAutomator 也交付可独立执行的自动化脚本。脚本是任务逻辑的实现方式；Automator 的上述 8 种类型是任务的封装与系统入口。AppleScript 脚本应用与 Automator 应用都可以使用 `.app` 后缀，但内部结构和构建方式不同。
 
 具体产物由用户指定，或由 Agent 根据触发方式、输入输出和目标环境选择。首期优先覆盖普通工作流程、应用程序、快速操作和文件夹操作；其他类型按需求扩展。系统集成类型需要同时处理文件生成、安装或注册、入口验证，才算完成交付。
 
@@ -64,9 +64,9 @@ Automator 支持通过 Shell、AppleScript 和 JavaScript 扩展工作流；脚�
 
 ## 安装与调用
 
-把本仓库复制或链接到目标 Agent 的技能目录，以 `amcreate` 作为目录名。例如 Codex 使用 `~/.codex/skills/amcreate`。目标目录已存在时先核对内容，避免覆盖。此仓库自身就是 Skill 目录，`SKILL.md` 为入口，不需要嵌套另一层。
+把本仓库复制或链接到目标 Agent 的技能目录，以 `autoautomator` 作为目录名。例如 Codex 使用 `~/.codex/skills/autoautomator`。目标目录已存在时先核对内容，避免覆盖。此仓库自身就是 Skill 目录，`SKILL.md` 为入口，不需要嵌套另一层。
 
-安装后以 `$amcreate` 调用，或描述 Mac 自动化任务。首个可执行示例：
+安装后以 `$autoautomator` 调用，或描述 Mac 自动化任务。首个可执行示例：
 
 ```sh
 /bin/zsh scripts/list_files.sh '/path/to/输入 目录' '/path/to/结果.txt'
@@ -91,6 +91,6 @@ python3 scripts/verify_delivery.py '/path/to/delivery'
 
 依赖、失败处理、权限和交付记录见 [可靠交付说明](references/delivery.md)。
 
-可保留的最终验收产物在 `build/验收/最终应用`、`最终工作流`、`最终快速操作`、`最终文件夹操作`，由 Git 忽略。应用的最终样例输入输出位于 `~/.local/share/amcreate-validation-20261009/`，避免依赖文稿目录授权；访问文稿目录需由用户处理系统权限请求。早期产物保留为阶段证据，不作为最终交付。回归测试使用临时目录。
+更名后的本机示例位于 `build/验收/20261010-更名/` 的 `app`、`workflow`、`quick-action`、`folder-action` 子目录，由 Git 忽略。应用的样例输入输出位置见对应的 `build.json` 参数，使用隔离目录避免依赖文稿目录授权；访问文稿目录需由用户处理系统权限请求。早期产物保留为阶段证据，不作为最终交付。回归测试使用临时目录。
 
 阶段验证证据见 [references/verification.md](references/verification.md)。

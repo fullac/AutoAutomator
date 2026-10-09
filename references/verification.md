@@ -1,5 +1,7 @@
 # 开发验证记录
 
+项目于 2026-10-10 更名为 AutoAutomator，Skill 调用名为 `autoautomator`。以下 2026-10-09 记录保留当时的 AMCreate / amcreate 名称、路径和菜单项，以便核对原始运行证据。
+
 ## 阶段 1 — 2026-10-09
 
 环境：macOS 26.6.2（25G83），系统 zsh；测试使用 Python 3.13。
@@ -36,3 +38,11 @@
 - 最终普通工作流通过 `/usr/bin/automator` 执行，结果核对通过；GUI 和系统入口证据见阶段 3。阶段 4 未重复修改服务/文件夹绑定，后台宿主及用户权限仍按实际入口区分。
 - 四类最终交付目录均通过 `verify_delivery.py`；`doctor.py` 三类依赖检查通过。Skill 官方 `quick_validate.py` 通过；仅校验工具在临时 venv 使用 PyYAML，项目构建、测试及产物均不依赖它。
 - 所有最终本机产物保留在仓库 `build/验收/` 下的 `最终*` 目录，早期应用移到 `历史阶段`。构建参数和源码均可查看。没有安装到用户 Skill 目录，没有推送远端；阶段 5 的四类按需扩展未实现。
+
+## 项目更名 — 2026-10-10
+
+- 本地仓库目录改为 `/Users/raymondzhang/Documents/AutoAutomator`，远程为 `fullac/AutoAutomator`；Skill 名称和调用名改为 `autoautomator` / `$autoautomator`。
+- 当前文档、UI 元信息、默认产物名称、Shell 参数标识、临时文件前缀及新应用日志目录统一使用新名称。旧验收记录和旧构建包保留当时的名称及固定参数，新示例单独重建，不修改已有签名包。
+- 在新目录运行 15 项回归测试全部通过；Skill 官方校验和本地文档链接检查通过。
+- 更名示例保留在 `build/验收/20261010-更名/`。四类交付目录均通过完整性检查；新应用通过 `/usr/bin/open -W -n` 启动，输出核对通过，日志实际写入 `~/Library/Logs/AutoAutomator/`。普通工作流通过系统 CLI 执行；快速操作和文件夹操作的参数传递通过系统 CLI 收据核对。
+- 样例数据位于 `~/.local/share/autoautomator-validation-20261010/`。本次未重新安装服务、绑定文件夹或进行 GUI 菜单验收；原始真实入口证据见 2026-10-09 记录。

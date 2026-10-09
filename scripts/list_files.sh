@@ -18,7 +18,7 @@ for file in "${files[@]}"; do
   [[ "${file:t}" != *$'\n'* ]] || { print -u2 'newline in filename cannot be represented in a line-based list'; exit 65; }
 done
 # Publish a complete file without following a destination symlink or replacing a racing writer.
-staging=$(/usr/bin/mktemp "${output:h}/.amcreate-list.XXXXXXXX")
+staging=$(/usr/bin/mktemp "${output:h}/.autoautomator-list.XXXXXXXX")
 trap '/bin/rm -f -- "$staging"' EXIT
 trap 'exit 130' HUP INT TERM
 { for file in "${files[@]}"; do print -r -- "${file:t}"; done; } >| "$staging"

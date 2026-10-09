@@ -26,7 +26,7 @@ class ListFilesTest(unittest.TestCase):
                 process.communicate(timeout=10)
             self.assertEqual(sum(p.returncode == 0 for p in processes), 1)
             self.assertEqual(set(output.read_text().splitlines()), names)
-            self.assertEqual(list(root.glob('.amcreate-list.*')), [])
+            self.assertEqual(list(root.glob('.autoautomator-list.*')), [])
 
     def test_empty_and_missing_input(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -78,7 +78,7 @@ class ListFilesTest(unittest.TestCase):
             output = root / 'result.txt'
             self.assertEqual(self.run_list(source, output).returncode, 65)
             self.assertFalse(output.exists())
-            self.assertEqual(list(root.glob('.amcreate-list.*')), [])
+            self.assertEqual(list(root.glob('.autoautomator-list.*')), [])
 
     def test_path_receipt_supports_newline_and_missing_input(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -96,7 +96,7 @@ class ListFilesTest(unittest.TestCase):
             self.assertEqual(len(list(receipts.iterdir())), 1)
 
     def test_names_and_no_overwrite(self):
-        with tempfile.TemporaryDirectory(prefix="AMCreate 中文 ") as folder:
+        with tempfile.TemporaryDirectory(prefix="AutoAutomator 中文 ") as folder:
             root = pathlib.Path(folder)
             source = root / "input"
             source.mkdir()

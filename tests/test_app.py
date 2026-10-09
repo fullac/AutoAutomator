@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 @unittest.skipUnless(platform.system() == "Darwin", "requires macOS osacompile")
 class AppTest(unittest.TestCase):
     def test_build_preserves_source_and_refuses_existing_delivery(self):
-        with tempfile.TemporaryDirectory(prefix="AMCreate app 中文 ") as folder:
+        with tempfile.TemporaryDirectory(prefix="AutoAutomator app 中文 ") as folder:
             output = pathlib.Path(folder) / "delivery"
             command = ["python3", str(ROOT / "scripts/build_app.py"), "--shell-script",
                        str(ROOT / "scripts/list_files.sh"), "--arg=quote'\"$ value",
