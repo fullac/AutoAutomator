@@ -7,7 +7,7 @@ import platform
 import sys
 
 REQUIRED = {
-    'script': ['/bin/zsh', '/usr/bin/mktemp', '/bin/link', '/bin/ls'],
+    'script': ['/bin/zsh', '/usr/bin/mktemp', '/bin/ls'],
     'app': ['/usr/bin/osacompile', '/usr/bin/codesign', '/bin/zsh'],
     'workflow': ['/usr/bin/automator', '/bin/zsh',
                  '/System/Library/Automator/Run Shell Script.action/Contents/Info.plist'],

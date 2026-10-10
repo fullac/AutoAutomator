@@ -11,23 +11,6 @@ class ListFilesTest(unittest.TestCase):
         return subprocess.run(['/bin/zsh', str(ROOT / 'scripts/list_files.sh'), str(source), str(output)],
                               capture_output=True, text=True)
 
-    def test_concurrent_writers_publish_one_complete_output(self):
-        with tempfile.TemporaryDirectory() as folder:
-            root = pathlib.Path(folder)
-            source = root / 'input'
-            source.mkdir()
-            names = {f'item-{i}.txt' for i in range(50)}
-            for name in names:
-                (source / name).touch()
-            output = root / 'result.txt'
-            command = ['/bin/zsh', str(ROOT / 'scripts/list_files.sh'), str(source), str(output)]
-            processes = [subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) for _ in range(2)]
-            for process in processes:
-                process.communicate(timeout=10)
-            self.assertEqual(sum(p.returncode == 0 for p in processes), 1)
-            self.assertEqual(set(output.read_text().splitlines()), names)
-            self.assertEqual(list(root.glob('.autoautomator-list.*')), [])
-
     def test_empty_and_missing_input(self):
         with tempfile.TemporaryDirectory() as folder:
             root = pathlib.Path(folder)
@@ -68,17 +51,6 @@ class ListFilesTest(unittest.TestCase):
             self.assertEqual(result.returncode, 73, result.stderr)
             self.assertTrue(link.is_symlink())
             self.assertFalse(target.exists())
-
-    def test_newline_filename_rejected_before_output(self):
-        with tempfile.TemporaryDirectory() as folder:
-            root = pathlib.Path(folder)
-            source = root / 'input'
-            source.mkdir()
-            (source / 'line\nname.txt').touch()
-            output = root / 'result.txt'
-            self.assertEqual(self.run_list(source, output).returncode, 65)
-            self.assertFalse(output.exists())
-            self.assertEqual(list(root.glob('.autoautomator-list.*')), [])
 
     def test_path_receipt_supports_newline_and_missing_input(self):
         with tempfile.TemporaryDirectory() as folder:

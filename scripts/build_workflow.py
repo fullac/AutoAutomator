@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Build a single-action Automator workflow with embedded Shell task source."""
 import argparse
-import hashlib
 import json
 from pathlib import Path
 import platform
@@ -111,12 +110,9 @@ def build(args):
         source_dir = output / 'source'
         source_dir.mkdir()
         shutil.copyfile(source, source_dir / 'task.sh')
-        record = {'schema_version': 1, 'artifact': bundle.name,
-                  'files': {str(path.relative_to(output)): hashlib.sha256(path.read_bytes()).hexdigest()
-                            for path in sorted(output.rglob('*')) if path.is_file()},
+        record = {'schema_version': 2, 'artifact': bundle.name,
                   'type': args.type, 'name': args.name, 'macos': platform.mac_ver()[0],
                   'shell': args.shell, 'arguments': args.arg,
-                  'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
                   'input': args.input, 'app': app if args.type == 'quick-action' else None,
                   'output_replaces_selection': args.output_replaces_selection,
                   'rebuild': ['python3', '<skill>/scripts/build_workflow.py', '--script', 'source/task.sh',

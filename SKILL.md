@@ -1,22 +1,32 @@
 ---
 name: autoautomator
-description: 在 macOS 上根据任务需求生成、构建和验证自动化脚本、AppleScript 应用及 Automator 工作流。适用于要求可运行脚本、双击应用、快速操作或文件夹操作的任务。
+description: 在 macOS 上生成、构建和验证自动化脚本、AppleScript 应用及 Automator 工作流。
 ---
 
 # AutoAutomator
 
-把用户的任务交付为可维护源码和可运行产物。先确定输入输出、触发方式、保存位置及副作用；只询问影响实现的缺失信息。遵循用户指定类型，没有指定时按入口选择：终端执行用脚本，双击用应用，Automator 编排用工作流，Finder 选中文件用快速操作，目录新增文件用文件夹操作。
+先根据触发入口选命令。任务脚本由 Agent 按用户需求编写；`S` 表示本 Skill 的绝对目录，输出目录 `OUT` 必须不存在。
 
-## 实施与验证
+| 需求 | 构建命令（Python 3.9+） | 安装 | 验收入口 |
+| --- | --- | --- | --- |
+| 终端执行 | 直接编写 Shell 脚本 | 无 | 终端 |
+| 双击应用 | `python3 S/scripts/build_app.py --shell-script TASK --name NAME --output OUT` | 移到用户指定目录 | Finder 双击 |
+| 拖入文件/文件夹 | 上一命令加 `--accept-drops` | 同上 | 拖到应用图标 |
+| Finder 文件快速操作 | `python3 S/scripts/build_workflow.py --script TASK --type quick-action --name NAME --output OUT` | `python3 S/scripts/install.py OUT/NAME.workflow` | Finder 服务菜单 |
+| 文本快速操作 | 上一构建命令加 `--input text --app any --output-replaces-selection` | 同上 | TextEdit 及目标应用服务菜单 |
+| 文件夹操作 | `python3 S/scripts/build_workflow.py --script TASK --type folder-action --name NAME --output OUT` | `python3 S/scripts/install.py OUT/NAME.workflow --folder DIR` | 向目录新增文件 |
+| Automator 手动编排 | `python3 S/scripts/build_workflow.py --script TASK --name NAME --output OUT` | 无 | Automator 运行 |
 
-1. 检查目标 macOS、系统工具和任务依赖；构建前读取 [references/delivery.md](references/delivery.md)，可用 `scripts/doctor.py` 检查所选类型依赖。用系统绝对路径；不要假定终端 PATH、Homebrew 或 Python 已存在。辅助构建工具的依赖与产物运行依赖分别说明。
-2. 在独立输出目录保留源码、配置与构建命令。参数以数据传递，Shell 参数逐个引用，避免把路径或输入拼入可执行代码。已有产物默认拒绝覆盖。
-3. 先用临时样例验证任务脚本，检查结果、退出状态及副作用，再封装实际需要的类型。删除、移动、覆盖真实数据及系统集成遵循本次授权范围。
-4. 构建后可用 `scripts/verify_delivery.py` 检查交付目录完整性，再按真实入口验收：脚本执行；应用从 Finder 双击；工作流在 Automator 运行；快速操作从菜单调用；文件夹操作由新增文件触发。构建或命令行运行不能代替尚未测过的入口。
-5. 交付源码、产物、构建方式、启动方式、输入输出、依赖、权限和验证记录。记录系统版本、样例及结果，明确未验证行为。权限失败检查实际宿主，不关闭系统安全机制。
+仅需终端运行时用纯脚本；需要后台目录监控时评估 `launchd WatchPaths`；用户已有快捷指令或更适合快捷指令的任务，按其入口实现。
 
-从最小的低副作用任务开始。文件清单示例见 [references/scripts.md](references/scripts.md)，可直接执行随 Skill 安装的 `scripts/list_files.sh`。任务不必套用示例逻辑，按用户需求编写可编辑源文件。
+关键参数与系统行为：
 
-## 能力边界
+- Shell 固定参数用重复的 `--arg=VALUE`，文件路径随后逐个追加；文本通过 stdin 输入，stdout 返回。非替换服务省略 `--output-replaces-selection`。
+- 应用从名称生成稳定 ID，也可 `--bundle-id com.example.task`；原生 AppleScript 用 `build_app.py --source TASK`。
+- 权限属于最终 `.app`、服务宿主或 `FolderActionsDispatcher`；安装器的 System Events 权限属于运行安装器的宿主。终端成功不能证明最终宿主有权限。
+- 菜单不出现时运行 `/System/Library/CoreServices/pbs -update`，核对输入类型和适用应用。
+- 文件夹任务自行处理文件尚未复制完成、重复触发和输出递归；非交互环境使用绝对路径。
+- 安装返回 ID 和记录；`python3 S/scripts/uninstall.py ID` 先解绑再删除，恢复原状态。记录不要丢弃；已有目标拒绝覆盖。
+- 保留源码及 `build.json` 重建参数，按真实入口核对结果，记录 macOS 版本和未测范围。
 
-已有脚本示例和 AppleScript 应用构建工具。应用任务读取 [references/applications.md](references/applications.md)，通过 `scripts/build_app.py` 构建。普通工作流、快速操作与文件夹操作读取 [references/workflows.md](references/workflows.md)，通过 `scripts/build_workflow.py` 构建。系统集成在用户要求范围内安装及绑定，验证完成后恢复测试状态。打印插件、日历提醒、图像捕捉插件、听写命令需要单独确认目标系统的注册方式和真实入口，不能仅凭扩展名宣布支持。签名、公证、跨 Mac 分发和长期后台运行按需求处理。
+需要具体参数时读取 [应用](references/applications.md)或[工作流与安装](references/workflows.md)；依赖、权限及恢复见[交付说明](references/delivery.md)。
