@@ -12,6 +12,13 @@
 - macOS 26.6.2：`open -W -n -a <app> <files...>` 发送真实 Open Documents 事件，单/双引号、中文、空格、多文件及文件夹的 NUL 参数收据核对通过；固定参数在前。Finder/AppleScript alias 解析后路径规范化，目录可能附加 `/`。
 - 无输入启动只收到固定参数；应用构建、签名、重建记录和 4 项应用回归通过。Finder 鼠标拖放未完成验收，不将系统 Open Documents 回归等同于鼠标操作。
 
+## Issue #4 — 2026-10-10
+
+- macOS 26.6.2：通过 `install.py` 安装文本快速操作，TextEdit 服务菜单实际调用并替换成功；通过 ID 卸载并刷新服务缓存。
+- 文件夹操作实际安装并绑定隔离目录，新增中文文件后后台产生 NUL 路径收据。卸载后 System Events 状态恢复为原来的全局 false、无绑定。
+- 8 项隔离回归验证：拒绝覆盖、保留被修改的安装副本、原有绑定/脚本启用状态恢复、多个安装的最后一次恢复、拒绝激活原有停用脚本、部分失败回滚、外部状态变更保护与恢复失败后重试。
+- 原生 FolderActionsKit 字典与实测发现 `script.path` 必须是 HFS 路径；安装器从 System Events 的文件对象读取该值，绑定/对账使用 POSIX 路径。
+
 项目于 2026-10-10 更名为 AutoAutomator，Skill 调用名为 `autoautomator`。以下 2026-10-09 记录保留当时的 AMCreate / amcreate 名称、路径和菜单项，以便核对原始运行证据。
 
 ## 阶段 1 — 2026-10-09

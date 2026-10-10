@@ -21,7 +21,14 @@ python3 scripts/build_workflow.py --script scripts/record_paths.sh --type quick-
 
 工作流声明 Finder 上下文、文件或文件夹输入及服务菜单项。输入传递方式是“作为自变量”：固定 `--arg` 在前，每个所选路径单独追加到任务参数。输出不替换 Finder 输入。
 
-在用户要求安装的范围内，把包复制到 `~/Library/Services/`；目标已存在则停止并核对，禁止默默覆盖。按需运行系统 `/System/Library/CoreServices/pbs -update` 更新服务缓存。在 Finder 选中文件，通过“访达 → 服务 → 记录所选路径”调用，核对收据。菜单未出现时检查系统服务启用状态、应用上下文和输入类型，不通过命令行运行代替菜单验证。快捷键单独按需设置。
+安装并刷新服务缓存：
+
+```sh
+python3 scripts/install.py '/path/to/new-delivery/记录所选路径.workflow'
+python3 scripts/uninstall.py '<install 返回的 id>'
+```
+
+目标为 `~/Library/Services/`，已存在则拒绝。安装返回 ID、位置和安装记录，卸载只处理该 ID 对应的副本。在 Finder 选中文件，通过“访达 → 服务 → 记录所选路径”调用，核对收据。菜单未出现时检查服务启用状态和上下文。快捷键在系统设置 → 键盘 → 键盘快捷键 → 服务中手动配置；未实现跨版本偏好设置写入。
 
 ### 文本快速操作
 
@@ -42,7 +49,12 @@ python3 scripts/build_workflow.py --script scripts/record_paths.sh --type folder
   --arg='/path/to/receipts' --name '记录新增路径' --output '/path/to/new-delivery'
 ```
 
-把包复制到 `~/Library/Workflows/Applications/Folder Actions/`（无目录时创建）。通过系统“文件夹操作设置”添加目标目录，附加该工作流，并在用户授权范围内启用文件夹操作。生成包本身不安装、不绑定、不启用。
+```sh
+python3 scripts/install.py '/path/to/new-delivery/记录新增路径.workflow' --folder '/path/to/watched'
+python3 scripts/uninstall.py '<install 返回的 id>'
+```
+
+安装器复制到 `~/Library/Workflows/Applications/Folder Actions/`，通过 System Events 绑定并启用，记录原状态。已有目标拒绝覆盖，已有停用脚本的目标目录拒绝自动激活。卸载先解绑再删除，只处理本工具安装的项目；最后一项文件夹安装移除后恢复原全局启用状态。如果期间其他绑定发生变化，保留当前全局状态并输出 warning。
 
 在新建隔离目录验证：输出收据目录置于监控目录之外；记录原启用状态及绑定；绑定后新增样例文件，等待后台触发并核对路径。结束后移除测试绑定及安装副本，恢复原启用状态。正式交付保留用户要求的绑定，并说明实际执行宿主 `FolderActionsDispatcher` 的权限。
 
