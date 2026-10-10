@@ -7,6 +7,11 @@
 - #2：原生 Automator 保存的文本快速操作用于核对输入输出元数据。TextEdit 与非 Apple 应用 Boop 均从“服务”菜单实测：`hello 中文 "quote"` 加换行第二行，在替换模式下变成 `HELLO`，非替换模式保留原文；任务收到中文、换行和引号。文本 stdin、无输入服务、指定应用及非法替换组合的回归通过。
 - 临时服务均已移出 `~/Library/Services/` 并刷新缓存；样本与收据保留在 `~/.local/share/autoautomator-issues-20261010/`。
 
+## Issue #3 — 2026-10-10
+
+- macOS 26.6.2：`open -W -n -a <app> <files...>` 发送真实 Open Documents 事件，单/双引号、中文、空格、多文件及文件夹的 NUL 参数收据核对通过；固定参数在前。Finder/AppleScript alias 解析后路径规范化，目录可能附加 `/`。
+- 无输入启动只收到固定参数；应用构建、签名、重建记录和 4 项应用回归通过。Finder 鼠标拖放未完成验收，不将系统 Open Documents 回归等同于鼠标操作。
+
 项目于 2026-10-10 更名为 AutoAutomator，Skill 调用名为 `autoautomator`。以下 2026-10-09 记录保留当时的 AMCreate / amcreate 名称、路径和菜单项，以便核对原始运行证据。
 
 ## 阶段 1 — 2026-10-09
