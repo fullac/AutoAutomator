@@ -10,6 +10,34 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 @unittest.skipUnless(platform.system() == 'Darwin', 'requires macOS Automator')
 class WorkflowTest(unittest.TestCase):
+    def test_native_languages_execute_input_and_reject_bad_syntax(self):
+        examples = {
+            'applescript': ('on run {input, parameters}\nreturn {"native 中文", item 1 of input}\nend run\n', 'task.applescript'),
+            'jxa': ('function run(input, parameters) { return ["native 中文", input[0]]; }\n', 'task.js')}
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            for language, (code, filename) in examples.items():
+                source = root / filename; source.write_text(code)
+                for kind in ('workflow', 'quick-action'):
+                    with self.subTest(language=language, kind=kind):
+                        output = root / (language + kind)
+                        command = ['python3', str(ROOT / 'scripts/build_workflow.py'), '--script', str(source),
+                                   '--language', language, '--type', kind, '--input', 'text', '--output', str(output)]
+                        built = subprocess.run(command, capture_output=True, text=True)
+                        self.assertEqual(built.returncode, 0, built.stderr)
+                        self.assertEqual((output / 'source' / filename).read_bytes(), source.read_bytes())
+                        bundle = output / 'AutoAutomator Task.workflow'
+                        result = subprocess.run(['/usr/bin/automator', '-i', '输入 "quote"', str(bundle)], capture_output=True, text=True, timeout=30)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        self.assertIn('native 中文', result.stdout)
+                        self.assertIn('输入', result.stdout)
+                source.write_text('this is invalid code !!!')
+                output = root / ('bad-' + language)
+                result = subprocess.run(['python3', str(ROOT / 'scripts/build_workflow.py'), '--script', str(source),
+                                         '--language', language, '--output', str(output)], capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse(output.exists())
+
     def test_text_stdin_and_service_contract(self):
         with tempfile.TemporaryDirectory() as folder:
             root = pathlib.Path(folder)

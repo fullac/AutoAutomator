@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a single-action Automator workflow with embedded Shell task source."""
+"""Build a single-action Automator workflow with embedded Shell, AppleScript or JXA."""
 import argparse
 import json
 from pathlib import Path
@@ -10,9 +10,11 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import uuid
 
-ACTION = Path('/System/Library/Automator/Run Shell Script.action')
+ACTIONS = {'shell': 'Run Shell Script', 'applescript': 'Run AppleScript', 'jxa': 'Run JavaScript'}
+SOURCES = {'shell': 'task.sh', 'applescript': 'task.applescript', 'jxa': 'task.js'}
 TYPES = {'workflow': 'com.apple.Automator.workflow',
          'quick-action': 'com.apple.Automator.servicesMenu',
          'folder-action': 'com.apple.Automator.folderAction'}
@@ -74,24 +76,40 @@ def build(args):
         raise ValueError('--app is only supported for quick actions')
     if args.type == 'folder-action' and args.input != 'files':
         raise ValueError('folder actions require file input')
-    action_info = plistlib.loads((ACTION / 'Contents/Info.plist').read_bytes())
+    if args.language != 'shell' and args.arg:
+        raise ValueError('--arg is only supported for Shell; native actions receive input and parameters')
+    action_path = Path('/System/Library/Automator') / (ACTIONS[args.language] + '.action')
+    action_info = plistlib.loads((action_path / 'Contents/Info.plist').read_bytes())
     automator_info = plistlib.loads(Path('/System/Applications/Automator.app/Contents/Info.plist').read_bytes())
-    subprocess.run([args.shell, '-n', str(source)], check=True, capture_output=True, text=True)
-    # Fixed arguments precede selected/added paths. Embedded source survives moving/installing the bundle.
-    command = 'exec ' + shlex.join([args.shell, '-c', source.read_text(), 'autoautomator-task'] + args.arg) + (' "$@"' if args.input == 'files' else '') + '\n'
+    # Validate and embed the same immutable source snapshot.
+    source_bytes = source.read_bytes()
+    source_text = source_bytes.decode('utf-8')
+    parameters = dict(action_info['AMDefaultParameters'])
+    if args.language == 'shell':
+        subprocess.run([args.shell, '-n'], input=source_text, check=True, capture_output=True, text=True)
+        command = 'exec ' + shlex.join([args.shell, '-c', source_text, 'autoautomator-task'] + args.arg) + (' "$@"' if args.input == 'files' else '') + '\n'
+        parameters.update(COMMAND_STRING=command, CheckedForUserDefaultShell=True,
+                          inputMethod=1 if args.input == 'files' else 0, shell=args.shell)
+    else:
+        with tempfile.TemporaryDirectory(prefix='autoautomator-syntax-') as temporary:
+            saved = Path(temporary) / SOURCES[args.language]
+            saved.write_bytes(source_bytes)
+            subprocess.run(['/usr/bin/osacompile', '-l', 'AppleScript' if args.language == 'applescript' else 'JavaScript',
+                            '-o', str(Path(temporary) / 'check.scpt'), str(saved)],
+                           check=True, capture_output=True, text=True)
+        parameters['source'] = source_text
     action = {
         'AMAccepts': action_info['AMAccepts'], 'AMProvides': action_info['AMProvides'],
         'AMActionVersion': action_info['CFBundleVersion'], 'CFBundleVersion': action_info['CFBundleVersion'],
-        'AMApplication': ['Automator'], 'ActionBundlePath': str(ACTION),
-        'ActionName': 'Run Shell Script', 'BundleIdentifier': action_info['CFBundleIdentifier'],
+        'AMApplication': ['Automator'], 'ActionBundlePath': str(action_path),
+        'ActionName': ACTIONS[args.language], 'BundleIdentifier': action_info['CFBundleIdentifier'],
         'Class Name': action_info['NSPrincipalClass'],
         'AMParameterProperties': {key: {} for key in action_info['AMDefaultParameters']},
-        'ActionParameters': {'COMMAND_STRING': command, 'CheckedForUserDefaultShell': True,
-                             'inputMethod': 1 if args.input == 'files' else 0, 'shell': args.shell, 'source': ''},
+        'ActionParameters': parameters,
         'CanShowSelectedItemsWhenRun': False, 'CanShowWhenRun': True,
         'InputUUID': str(uuid.uuid4()).upper(), 'OutputUUID': str(uuid.uuid4()).upper(),
         'UUID': str(uuid.uuid4()).upper(), 'isViewVisible': 1,
-        'nibPath': str(ACTION / 'Contents/Resources/Base.lproj/main.nib'),
+        'nibPath': str(action_path / 'Contents/Resources/Base.lproj/main.nib'),
     }
     document = {'AMApplicationBuild': automator_info['CFBundleVersion'],
                 'AMApplicationVersion': automator_info['CFBundleShortVersionString'],
@@ -109,15 +127,16 @@ def build(args):
             (contents / 'Info.plist').write_bytes(plistlib.dumps(info))
         source_dir = output / 'source'
         source_dir.mkdir()
-        shutil.copyfile(source, source_dir / 'task.sh')
+        (source_dir / SOURCES[args.language]).write_bytes(source_bytes)
         record = {'schema_version': 2, 'artifact': bundle.name,
                   'type': args.type, 'name': args.name, 'macos': platform.mac_ver()[0],
-                  'shell': args.shell, 'arguments': args.arg,
+                  'language': args.language, 'shell': args.shell if args.language == 'shell' else None, 'arguments': args.arg,
                   'input': args.input, 'app': app if args.type == 'quick-action' else None,
                   'output_replaces_selection': args.output_replaces_selection,
-                  'rebuild': ['python3', '<skill>/scripts/build_workflow.py', '--script', 'source/task.sh',
-                              '--type', args.type, '--shell', args.shell, '--name', args.name,
+                  'rebuild': ['python3', '<skill>/scripts/build_workflow.py', '--script', 'source/' + SOURCES[args.language],
+                              '--type', args.type, '--language', args.language, '--name', args.name,
                               '--output', '<new-delivery-directory>', '--input', args.input]
+                             + (['--shell', args.shell] if args.language == 'shell' else [])
                              + (['--app', app] if args.type == 'quick-action' else [])
                              + (['--output-replaces-selection'] if args.output_replaces_selection else [])
                              + ['--arg=' + arg for arg in args.arg],
@@ -134,6 +153,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--script', type=Path, required=True)
     parser.add_argument('--type', choices=TYPES, default='workflow')
+    parser.add_argument('--language', choices=ACTIONS, default='shell')
     parser.add_argument('--shell', default='/bin/zsh')
     parser.add_argument('--arg', action='append', default=[])
     parser.add_argument('--input', choices=('files', 'text', 'none'), default='files')

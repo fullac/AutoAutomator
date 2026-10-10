@@ -1,6 +1,16 @@
 # Automator 工作流与系统入口
 
-构建工具需要 macOS、Python 3.9+ 标准库及系统“运行 Shell 脚本”动作。产物使用系统 Shell 与 Automator，无需 Python。当前实现单个 Shell 动作，任务源码嵌入 `document.wflow`，可移走原源码或安装后执行。保留 `source/task.sh` 与 `build.json` 供修改及重建。
+构建工具需要 macOS、Python 3.9+ 标准库及所选系统动作；原生语言还需 `osacompile`。产物使用系统 Shell / AppleScript / JXA 与 Automator，无需 Python。单个动作的任务源码嵌入 `document.wflow`，可移走原源码或安装后执行；`source/` 与 `build.json` 供修改及重建。
+
+## 原生 AppleScript / JXA 动作
+
+```sh
+python3 scripts/build_workflow.py --script task.applescript --language applescript --output '/path/to/new-delivery'
+python3 scripts/build_workflow.py --script task.js --language jxa --type quick-action --input text \
+  --output-replaces-selection --name 'JXA 文本服务' --output '/path/to/new-delivery'
+```
+
+AppleScript 入口为 `on run {input, parameters}`，JXA 为 `function run(input, parameters)`，接收 Automator 输入列表并返回结果。原生动作不接收 Shell `--arg`，固定配置写在源码中。构建从系统动作 bundle 读取版本、类型及默认参数；用 `osacompile` 在临时目录语法检查，与嵌入/归档使用同一份源码快照。权限由实际 Automator/服务宿主请求；控制其他应用时按实际目标验收。
 
 ## 普通工作流
 

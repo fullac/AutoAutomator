@@ -22,6 +22,7 @@ description: 在 macOS 上生成、构建和验证自动化脚本、AppleScript 
 关键参数与系统行为：
 
 - Shell 固定参数用重复的 `--arg=VALUE`，文件路径随后逐个追加；文本通过 stdin 输入，stdout 返回。非替换服务省略 `--output-replaces-selection`。
+- 工作流添加 `--language applescript|jxa` 可用原生动作；AppleScript 接收 `on run {input, parameters}`，JXA 接收 `run(input, parameters)`，返回值作为输出。原生动作不使用 `--arg`。
 - 应用从名称生成稳定 ID，也可 `--bundle-id com.example.task`；原生 AppleScript 用 `build_app.py --source TASK`。
 - 权限属于最终 `.app`、服务宿主或 `FolderActionsDispatcher`；安装器的 System Events 权限属于运行安装器的宿主。终端成功不能证明最终宿主有权限。
 - 菜单不出现时运行 `/System/Library/CoreServices/pbs -update`，核对输入类型和适用应用。
