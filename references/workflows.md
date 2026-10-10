@@ -23,6 +23,18 @@ python3 scripts/build_workflow.py --script scripts/record_paths.sh --type quick-
 
 在用户要求安装的范围内，把包复制到 `~/Library/Services/`；目标已存在则停止并核对，禁止默默覆盖。按需运行系统 `/System/Library/CoreServices/pbs -update` 更新服务缓存。在 Finder 选中文件，通过“访达 → 服务 → 记录所选路径”调用，核对收据。菜单未出现时检查系统服务启用状态、应用上下文和输入类型，不通过命令行运行代替菜单验证。快捷键单独按需设置。
 
+### 文本快速操作
+
+```sh
+python3 scripts/build_workflow.py --script text.sh --type quick-action \
+  --input text --app any --output-replaces-selection \
+  --name '转换所选文本' --output '/path/to/new-delivery'
+```
+
+文本从 stdin 传入，stdout 作为服务结果；省略 `--output-replaces-selection` 时不替换原文（任务可自行写剪贴板）。`--input files|text|none` 默认 files；`--app finder|any|<bundle-id>` 默认文件用 Finder，文本/无输入用任意应用。替换选项仅用于文本快速操作；文件夹操作只接收文件。文本服务的 `NSSendTypes` / `NSReturnTypes` 使用 `public.utf8-plain-text`，并与工作流的输入输出类型一致。
+
+在 TextEdit 和一个非 Apple 应用中选中含中文、换行、引号的文本，通过服务菜单分别核对替换与非替换。服务是否支持所选控件由宿主应用决定。
+
 ## 文件夹操作
 
 ```sh

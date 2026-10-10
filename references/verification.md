@@ -1,5 +1,12 @@
 # 开发验证记录
 
+## Issue #1 / #2 — 2026-10-10
+
+- 环境：macOS 26.6.2（25G83），Automator 2.10。
+- #1：同名应用重建两次，bundle ID 和日志位置一致；显式 ID、重建记录、非法 ID 拒绝及严格签名校验通过。未验证受保护目录的 TCC 授权继承；ad-hoc 签名改变仍可能重新授权。
+- #2：原生 Automator 保存的文本快速操作用于核对输入输出元数据。TextEdit 与非 Apple 应用 Boop 均从“服务”菜单实测：`hello 中文 "quote"` 加换行第二行，在替换模式下变成 `HELLO`，非替换模式保留原文；任务收到中文、换行和引号。文本 stdin、无输入服务、指定应用及非法替换组合的回归通过。
+- 临时服务均已移出 `~/Library/Services/` 并刷新缓存；样本与收据保留在 `~/.local/share/autoautomator-issues-20261010/`。
+
 项目于 2026-10-10 更名为 AutoAutomator，Skill 调用名为 `autoautomator`。以下 2026-10-09 记录保留当时的 AMCreate / amcreate 名称、路径和菜单项，以便核对原始运行证据。
 
 ## 阶段 1 — 2026-10-09
