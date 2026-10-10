@@ -13,7 +13,7 @@ python3 scripts/verify_delivery.py '/path/to/delivery'
 
 `doctor.py` 报告系统版本、工具缺失及构建依赖；不证明用户任务依赖或权限已满足。`verify_delivery.py` 检查 `build.json` 中的 SHA-256、包类型、服务声明及应用严格签名校验；不运行任务。旧构建记录没有 `schema_version: 1` 时需重新构建。摘要用于检测构建后的意外改动，不是可信发布者证明。
 
-AppleScript 应用在资源装配完成后做 ad-hoc 签名，验证本机包完整性；未做 Developer ID 签名、公证或其他 Mac 验收。应用标识每次构建唯一，系统可能对新构建再次请求权限。
+AppleScript 应用在资源装配完成后做 ad-hoc 签名，验证本机包完整性；未做 Developer ID 签名、公证或其他 Mac 验收。应用标识由名称稳定生成，也可用 `--bundle-id` 指定；代码及 ad-hoc 签名变化仍可能触发 TCC 重新授权。
 
 ## 失败与恢复
 

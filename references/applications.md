@@ -25,3 +25,5 @@ Shell 源码被复制到应用资源，启动器通过自身位置定位资源�
 依据：[Apple 脚本应用运行说明](https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/RunaScript.html)与目标系统 `osacompile` 实测。
 
 构建后进行 ad-hoc 签名与严格校验；它用于本机完整性检查。访问文稿等受保护目录可能等待用户授权，具体检查和交付记录见 [可靠交付](delivery.md)。
+
+应用身份默认由名称稳定生成（规范化名称加摘要，避免不同中文名称碰撞），可用 `--bundle-id com.example.my-task` 显式指定。`build.json` 保留 ID、稳定日志位置及带 ID 的重建命令。保持 ID 能避免每次创建新身份；ad-hoc 签名重建后的代码变化仍可能触发 TCC 重新授权，不保证权限自动继承。

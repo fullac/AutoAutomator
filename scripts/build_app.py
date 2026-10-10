@@ -6,10 +6,18 @@ import json
 from pathlib import Path
 import platform
 import plistlib
+import re
 import shutil
 import subprocess
 import sys
-import uuid
+
+
+def application_id(name, explicit=None):
+    slug = re.sub(r'[^a-z0-9-]+', '-', name.lower()).strip('-')[:80] or 'task'
+    value = explicit or ('com.autoautomator.' + slug + '-' + hashlib.sha256(name.encode()).hexdigest()[:8])
+    if len(value) > 255 or not re.fullmatch(r'[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+', value):
+        raise ValueError('--bundle-id must be a reverse-DNS identifier containing letters, digits, dots or hyphens')
+    return value
 
 
 def as_string(value):
@@ -42,6 +50,7 @@ def build(args):
         raise ValueError("name must be a single filename without slash, colon or newline")
     if args.source and args.arg:
         raise ValueError("--arg is only supported with --shell-script")
+    bundle_id = application_id(args.name, args.bundle_id)
     if args.shell not in ("/bin/sh", "/bin/bash", "/bin/zsh"):
         raise ValueError("choose a system shell: /bin/sh, /bin/bash or /bin/zsh")
     if not all(Path(tool).is_file() for tool in ("/usr/bin/osacompile", "/usr/bin/codesign", args.shell)):
@@ -53,7 +62,6 @@ def build(args):
     try:
         source_dir = output / "source"
         source_dir.mkdir()
-        bundle_id = "autoautomator." + uuid.uuid4().hex
         if args.shell_script:
             saved_source = source_dir / "task.sh"
             shutil.copyfile(source, saved_source)
@@ -70,7 +78,7 @@ def build(args):
             shutil.copyfile(saved_source, application / "Contents/Resources/task.sh")
         info_path = application / "Contents/Info.plist"
         info = plistlib.loads(info_path.read_bytes())
-        info["CFBundleIdentifier"] = "com." + bundle_id
+        info["CFBundleIdentifier"] = bundle_id
         info_path.write_bytes(plistlib.dumps(info))
         # Resource copying must finish before ad-hoc signing the complete local application.
         subprocess.run(["/usr/bin/codesign", "--force", "--sign", "-", str(application)],
@@ -84,6 +92,7 @@ def build(args):
                       for path in sorted(output.rglob("*")) if path.is_file()},
             "signing": "ad-hoc; local integrity only, no Developer ID or notarization",
             "type": "applescript-application", "name": args.name,
+            "bundle_id": bundle_id,
             "macos": platform.mac_ver()[0],
             "source_sha256": hashlib.sha256(saved_source.read_bytes()).hexdigest(),
             "shell": args.shell if args.shell_script else None,
@@ -92,7 +101,7 @@ def build(args):
             "rebuild": ["python3", "<skill>/scripts/build_app.py",
                         "--shell-script" if args.shell_script else "--source",
                         str(saved_source.relative_to(output)), "--output", "<new-delivery-directory>",
-                        "--name", args.name] + (["--shell", args.shell] if args.shell_script else [])
+                        "--name", args.name, "--bundle-id", bundle_id] + (["--shell", args.shell] if args.shell_script else [])
                        + ["--arg=" + arg for arg in args.arg],
             "validation": "built; actual launch and task result must be tested separately",
         }
@@ -111,6 +120,7 @@ def main():
     parser.add_argument("--shell", default="/bin/zsh")
     parser.add_argument("--arg", action="append", default=[], help="fixed task argument; repeat as needed")
     parser.add_argument("--name", default="AutoAutomator Task")
+    parser.add_argument("--bundle-id", help="stable reverse-DNS identity; defaults to a name-derived ID")
     parser.add_argument("--output", type=Path, required=True, help="new delivery directory, parent must exist")
     args = parser.parse_args()
     try:
