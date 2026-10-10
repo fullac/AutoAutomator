@@ -1,9 +1,11 @@
 ---
 name: autoautomator
-description: 在 macOS 上生成、构建和验证自动化脚本、AppleScript 应用及 Automator 工作流。
+description: 在 macOS 上生成并安装 Finder/文本快速操作、文件夹操作和可拖放应用，处理系统入口的包格式、服务声明、绑定与权限宿主。
 ---
 
 # AutoAutomator
+
+把任务脚本接入 macOS 系统入口：Finder / 文本服务、文件夹操作和可拖放应用。
 
 先根据触发入口选命令。任务脚本由 Agent 按用户需求编写；`S` 表示本 Skill 的绝对目录，输出目录 `OUT` 必须不存在。
 

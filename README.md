@@ -1,6 +1,8 @@
 # AutoAutomator
 
-macOS 自动化 Agent Skill，生成 AppleScript 应用、Automator 工作流、文件/文本快速操作和文件夹操作，保留源码并提供安装、卸载命令。
+让 Agent 正确生成并安装 macOS 系统入口：Finder / 文本快速操作、文件夹操作、可拖放应用。任务脚本由 Agent 按业务需求编写；本 Skill 处理 Automator 包格式、服务输入输出声明、安装刷新、目录绑定与权限宿主。
+
+核心入口已有构建工具及本机验证；普通工作流用于手动编排，纯终端任务直接用脚本。后台目录监控可评估 `launchd WatchPaths`，用户已有快捷指令时按其入口实现。各项实现与验收范围见[路线图](docs/roadmap.md)。
 
 安装到 Agent 的技能目录，目录名使用 `autoautomator`。只复制 `SKILL.md`、`agents/`、`scripts/`、`references/`；目标已存在时先核对。也可链接整个仓库。调用 `$autoautomator`，描述任务及触发入口。
 

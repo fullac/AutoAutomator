@@ -1,4 +1,4 @@
 interface:
   display_name: "AutoAutomator"
-  short_description: "在 Mac 上生成可维护、可构建并经实际入口验证的自动化脚本、应用和工作流"
-  default_prompt: "使用 $autoautomator 把我的 Mac 自动化需求做成可运行的产物，保留源码并验证实际入口。"
+  short_description: "将任务脚本接入 Mac 的文件或文本服务菜单、文件夹操作及拖放应用"
+  default_prompt: "使用 $autoautomator 为我的任务生成并安装合适的 macOS 系统入口，验证实际触发和结果。"
