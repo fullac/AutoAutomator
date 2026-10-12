@@ -1,6 +1,16 @@
 # Automator 工作流与系统入口
 
-构建工具需要 macOS、Python 3.9+ 标准库及系统“运行 Shell 脚本”动作。产物使用系统 Shell 与 Automator，无需 Python。当前实现单个 Shell 动作，任务源码嵌入 `document.wflow`，可移走原源码或安装后执行。保留 `source/task.sh` 与 `build.json` 供修改及重建。
+构建工具需要 macOS、Python 3.9+ 标准库及所选系统动作；原生语言还需 `osacompile`。产物使用系统 Shell / AppleScript / JXA 与 Automator，无需 Python。单个动作的任务源码嵌入 `document.wflow`，可移走原源码或安装后执行；`source/` 与 `build.json` 供修改及重建。
+
+## 原生 AppleScript / JXA 动作
+
+```sh
+python3 scripts/build_workflow.py --script task.applescript --language applescript --output '/path/to/new-delivery'
+python3 scripts/build_workflow.py --script task.js --language jxa --type quick-action --input text \
+  --output-replaces-selection --name 'JXA 文本服务' --output '/path/to/new-delivery'
+```
+
+AppleScript 入口为 `on run {input, parameters}`，JXA 为 `function run(input, parameters)`，接收 Automator 输入列表并返回结果。原生动作不接收 Shell `--arg`，固定配置写在源码中。构建从系统动作 bundle 读取版本、类型及默认参数；用 `osacompile` 在临时目录语法检查，与嵌入/归档使用同一份源码快照。权限由实际 Automator/服务宿主请求；控制其他应用时按实际目标验收。
 
 ## 普通工作流
 
@@ -21,7 +31,26 @@ python3 scripts/build_workflow.py --script scripts/record_paths.sh --type quick-
 
 工作流声明 Finder 上下文、文件或文件夹输入及服务菜单项。输入传递方式是“作为自变量”：固定 `--arg` 在前，每个所选路径单独追加到任务参数。输出不替换 Finder 输入。
 
-在用户要求安装的范围内，把包复制到 `~/Library/Services/`；目标已存在则停止并核对，禁止默默覆盖。按需运行系统 `/System/Library/CoreServices/pbs -update` 更新服务缓存。在 Finder 选中文件，通过“访达 → 服务 → 记录所选路径”调用，核对收据。菜单未出现时检查系统服务启用状态、应用上下文和输入类型，不通过命令行运行代替菜单验证。快捷键单独按需设置。
+安装并刷新服务缓存：
+
+```sh
+python3 scripts/install.py '/path/to/new-delivery/记录所选路径.workflow'
+python3 scripts/uninstall.py '<install 返回的 id>'
+```
+
+目标为 `~/Library/Services/`，已存在则拒绝。安装返回 ID、位置和安装记录，卸载只处理该 ID 对应的副本。在 Finder 选中文件，通过“访达 → 服务 → 记录所选路径”调用，核对收据。菜单未出现时检查服务启用状态和上下文。快捷键在系统设置 → 键盘 → 键盘快捷键 → 服务中手动配置；未实现跨版本偏好设置写入。
+
+### 文本快速操作
+
+```sh
+python3 scripts/build_workflow.py --script text.sh --type quick-action \
+  --input text --app any --output-replaces-selection \
+  --name '转换所选文本' --output '/path/to/new-delivery'
+```
+
+文本从 stdin 传入，stdout 作为服务结果；省略 `--output-replaces-selection` 时不替换原文（任务可自行写剪贴板）。`--input files|text|none` 默认 files；`--app finder|any|<bundle-id>` 默认文件用 Finder，文本/无输入用任意应用。替换选项仅用于文本快速操作；文件夹操作只接收文件。文本服务的 `NSSendTypes` / `NSReturnTypes` 使用 `public.utf8-plain-text`，并与工作流的输入输出类型一致。
+
+在 TextEdit 和一个非 Apple 应用中选中含中文、换行、引号的文本，通过服务菜单分别核对替换与非替换。服务是否支持所选控件由宿主应用决定。
 
 ## 文件夹操作
 
@@ -30,7 +59,12 @@ python3 scripts/build_workflow.py --script scripts/record_paths.sh --type folder
   --arg='/path/to/receipts' --name '记录新增路径' --output '/path/to/new-delivery'
 ```
 
-把包复制到 `~/Library/Workflows/Applications/Folder Actions/`（无目录时创建）。通过系统“文件夹操作设置”添加目标目录，附加该工作流，并在用户授权范围内启用文件夹操作。生成包本身不安装、不绑定、不启用。
+```sh
+python3 scripts/install.py '/path/to/new-delivery/记录新增路径.workflow' --folder '/path/to/watched'
+python3 scripts/uninstall.py '<install 返回的 id>'
+```
+
+安装器复制到 `~/Library/Workflows/Applications/Folder Actions/`，通过 System Events 绑定并启用，记录原状态。已有目标拒绝覆盖，已有停用脚本的目标目录拒绝自动激活。卸载先解绑再删除，只处理本工具安装的项目；最后一项文件夹安装移除后恢复原全局启用状态。如果期间其他绑定发生变化，保留当前全局状态并输出 warning。
 
 在新建隔离目录验证：输出收据目录置于监控目录之外；记录原启用状态及绑定；绑定后新增样例文件，等待后台触发并核对路径。结束后移除测试绑定及安装副本，恢复原启用状态。正式交付保留用户要求的绑定，并说明实际执行宿主 `FolderActionsDispatcher` 的权限。
 
