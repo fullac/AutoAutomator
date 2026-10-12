@@ -1,5 +1,12 @@
 # 开发验证记录
 
+## README 更新与合并前回归 — 2026-10-12
+
+- README 补充能力表、Skill 安装方法、文本快速操作的完整构建/安装示例及当前验收边界；路线图补全 #7 的提交编号。
+- `python3 -m unittest discover -s tests -v`：24 项通过。沙箱内首次运行出现 AppleScript 编译和 Automator 打开错误，放开执行沙箱后同一套回归通过，未修改实现代码。
+- 全部本地 Markdown 链接与 `git diff --check` 通过。README 示例构建后由 `/usr/bin/automator -i hello` 执行，返回 `HELLO`；本轮未安装该示例服务，未新增 GUI 菜单验收或文件夹绑定。
+- #1 的重建后 TCC 授权继承、#3 的 Finder 鼠标拖放、#5 的首次跨应用权限弹窗仍待实测。应用 Open Documents 回归通过不等同于鼠标拖放验收。
+
 ## Issue #7 — 2026-10-10
 
 - README、Skill 描述和 UI 调用元信息统一为“macOS 系统入口生成与安装”；命令表涵盖文件/文本服务、文件夹操作、拖放应用及原生脚本动作。最终 Skill 入口 35 行。
